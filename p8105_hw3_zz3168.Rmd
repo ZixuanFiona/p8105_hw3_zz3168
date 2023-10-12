@@ -147,16 +147,13 @@ parti_data =
         
       
 
-
-  
-
 accel_data = 
   read_csv("data/nhanes_accel.csv") |> 
   janitor::clean_names() |> 
   pivot_longer(
     min1:min1440,
-    names_to = "number time",
-    values_to = "activity time",
+    names_to = "number_time",
+    values_to = "activity_time",
     names_prefix = "min"
   )
   
@@ -165,4 +162,42 @@ nahanes_merge =
   left_join(parti_data, accel_data, by = "seqn")
 ```
 
+#question 1 produce table
+```{r}
+parti_data |> 
+  select(education , sex) |> 
+  table()
+```
+
+```{r}
+parti_data |> 
+  ggplot(aes(x = age, fill = sex)) +
+  geom_density(alpha = .5) +
+  facet_grid(~ education) +
+  labs(
+    x = "Age",
+    y = "Number of Pariticants",
+    title =  "Age Distributions by Education And Sex "
+       ) +
+  theme_minimal()
+
+```
+
+##question 2 
+```{r}
+nahanes_merge |> 
+  group_by(seqn, sex, age, education) |> 
+  summarize(total_activity = sum(activity_time)) |> 
+  ggplot(aes(x = age, y = total_activity)) +
+  geom_point() +
+  geom_smooth(se = FALSE)+
+  facet_grid(~ education) +
+  labs(
+    x = "Age",
+    y = "Total Activity",
+    title = "Total Activity and Age by Sex and Education"
+  ) +
+  theme_minimal()
+  
+```
 
