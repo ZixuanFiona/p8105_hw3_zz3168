@@ -12,6 +12,8 @@ data("instacart")
 library(tidyverse)
 library(p8105.datasets)
 data("brfss_smart2010")
+library(ggridges)
+library(patchwork)
 
 ```
 
@@ -19,11 +21,8 @@ data("brfss_smart2010")
 
 
 ```{r}
-library(tidyverse)
-library(ggridges)
-library(patchwork)
 
-library(p8105.datasets)
+
 
 knitr::opts_chunk$set(
 	echo = TRUE,
@@ -66,7 +65,16 @@ brfss_state_2002 =
   clean_data |> 
   filter(year == "2002") |> 
   group_by(locationabbr) |> 
-  filter(locationdesc >= 7 )
+  summarize(location_num = n_distinct(locationdesc)) |> 
+  filter(location_num >= 7 )
+
+brfss_state_2010 = 
+  clean_data |> 
+  filter(year == "2010") |> 
+  group_by(locationabbr) |> 
+  summarize(location_num = n_distinct(locationdesc)) |> 
+  filter(location_num >= 7 )
+  
   
 ```
 
@@ -104,10 +112,57 @@ ggplot(
 ```{r}
 clean_data |> 
   filter(year %in% c(2006, 2010), locationabbr == "NY") |> 
-  ggplot(aes(x = response, y = data_value)) +
+  ggplot(aes(x = response, y = data_value, fill = response)) +
   geom_boxplot() +
   facet_grid(~year)
 ```
 
 
 ### Problem 3
+
+```{r}
+parti_data =
+  read_csv("data/nhanes_covar.csv", skip = 4) |> 
+  janitor::clean_names() |> 
+  filter(
+    age >= 21,
+    is.na(bmi) == FALSE,
+    is.na(education) == FALSE
+  ) |> 
+  mutate(
+    sex = 
+      case_match(
+        sex,
+        1 ~ "male",
+        2 ~ "female"),
+    sex = as.factor(sex),
+    education = 
+      case_match(
+        education, 
+        1 ~ "Less than high school",
+        2 ~ "High school equivalent",
+        3 ~ "More than high school"),
+    education = as.factor(education)
+      )
+        
+      
+
+
+  
+
+accel_data = 
+  read_csv("data/nhanes_accel.csv") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    min1:min1440,
+    names_to = "number time",
+    values_to = "activity time",
+    names_prefix = "min"
+  )
+  
+
+nahanes_merge = 
+  left_join(parti_data, accel_data, by = "seqn")
+```
+
+
