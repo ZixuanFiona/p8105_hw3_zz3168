@@ -201,3 +201,20 @@ nahanes_merge |>
   
 ```
 
+##question 3 Make a three-panel plot
+
+```{r}
+nahanes_merge |> 
+  ggplot(aes(x = number_time, y = activity_time, color = sex)) +
+  geom_line(alpha = .5) +
+  geom_smooth(aes(group = sex), se = FALSE) +
+  facet_wrap(~ education) +
+  labs(
+    x = "Time",
+    y = "Activity",
+    title = "24-hour Activity Time Courses by Education And Sex "
+  )
+  
+  
+```
+
