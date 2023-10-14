@@ -218,6 +218,9 @@ accel_data =
     names_to = "number_time",
     values_to = "activity_time",
     names_prefix = "min"
+  ) |> 
+  mutate(
+    number_time = as.numeric(number_time)
   )
   
 
@@ -284,6 +287,10 @@ nahanes_merge |>
     x = "Time",
     y = "Activity",
     title = "24-hour Activity Time Courses by Education And Sex "
+  )+
+  scale_x_continuous(
+    breaks = c(1,300,600,900,1200,1500),
+    labels = c("1","300","600","900","1200","1500")
   )
   
 
