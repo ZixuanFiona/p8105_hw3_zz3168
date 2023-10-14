@@ -21,9 +21,6 @@ library(patchwork)
 
 
 ```{r}
-
-
-
 knitr::opts_chunk$set(
 	echo = TRUE,
 	warning = FALSE,
@@ -43,6 +40,68 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+#### Read in the data
+
+```{r}
+data("instacart")
+
+instacart = 
+  instacart |> 
+  as_tibble()
+```
+
+#### Answer questions about the data
+
+This dataset contains `r nrow(instacart)` rows and `r ncol(instacart)` columns, with each row resprenting a single product from an instacart order. Variables include identifiers for user, order, and product; the order in which each product was added to the cart. There are several order-level variables, describing the day and time of the order, and number of days since prior order. Then there are several item-specific variables, describing the product name (e.g. Yogurt, Avocado), department (e.g. dairy and eggs, produce), and aisle (e.g. yogurt, fresh fruits), and whether the item has been ordered by this user in the past. In total, there are `r instacart |> select(product_id) |> distinct() |> count()` products found in `r instacart |> select(user_id, order_id) |> distinct() |> count()` orders from `r instacart |> select(user_id) |> distinct() |> count()` distinct users.
+
+Below is a table summarizing the number of items ordered from aisle. In total, there are 134 aisles, with fresh vegetables and fresh fruits holding the most items ordered by far.
+
+```{r}
+instacart |> 
+  count(aisle) |> 
+  arrange(desc(n))
+```
+
+Next is a plot that shows the number of items ordered in each aisle. Here, aisles are ordered by ascending number of items.
+
+```{r}
+instacart |> 
+  count(aisle) |> 
+  filter(n > 10000) |> 
+  mutate(aisle = fct_reorder(aisle, n)) |> 
+  ggplot(aes(x = aisle, y = n)) + 
+  geom_point() + 
+  labs(title = "Number of items ordered in each aisle") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+```
+
+Our next table shows the three most popular items in aisles `baking ingredients`, `dog food care`, and `packaged vegetables fruits`, and includes the number of times each item is ordered in your table.
+
+```{r}
+instacart |> 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) |>
+  group_by(aisle) |> 
+  count(product_name) |> 
+  mutate(rank = min_rank(desc(n))) |> 
+  filter(rank < 4) |> 
+  arrange(desc(n)) |>
+  knitr::kable()
+```
+
+Finally is a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week. Pink Lady Apples are generally purchased slightly earlier in the day than Coffee Ice Cream, with the exception of day 5.
+
+```{r}
+instacart |>
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) |>
+  group_by(product_name, order_dow) |>
+  summarize(mean_hour = mean(order_hour_of_day)) |>
+  pivot_wider(
+    names_from = order_dow, 
+    values_from = mean_hour) |>
+  knitr::kable(digits = 2)
+```
+
 
 
 ## Problem 2
@@ -58,6 +117,7 @@ clean_data =
   arrange(response)
 
 ```
+
 
 
 ```{r}
@@ -78,6 +138,7 @@ brfss_state_2010 =
   
 ```
 
+According to the data, we observe  there are `r nrow(brfss_state_2002)` states at 7 or more locations in 2002. and there are `r nrow(brfss_state_2010)` states at 7 or more locations in 2010.
 
 #construct a dataset
 ```{r}
@@ -107,6 +168,7 @@ ggplot(
    
 ```
 
+I construct the dataset call `dataset_exce`, which contain the `year`, `state`, and `avg_value`. and make a “spaghetti” plot showing a line for each state across years .
 
 #two-panel plot 
 ```{r}
@@ -117,6 +179,7 @@ clean_data |>
   facet_grid(~year)
 ```
 
+According to the two-panel plot,  the years 2006 and 2010 are showing the different values about `poor`,  `good`, `Very good`,`excellent`. Base on the plot, the `Good` and `Very good` at the highest value in 2006 and 2010. 
 
 ### Problem 3
 
@@ -162,12 +225,16 @@ nahanes_merge =
   left_join(parti_data, accel_data, by = "seqn")
 ```
 
+
+
 #question 1 produce table
 ```{r}
 parti_data |> 
   select(education , sex) |> 
   table()
 ```
+
+The table show the participants from different education level and sex.
 
 ```{r}
 parti_data |> 
@@ -183,12 +250,14 @@ parti_data |>
 
 ```
 
+ The three-panel plot that shows the 24-hour activity time courses for each education level and classified into men and women. In the education level, the `High school equivalent` and ` less rha high school`'s female is skewed to the left. And in the distribuction, male is bimodel distribution and skewed to the left.
+
 ##question 2 
 ```{r}
 nahanes_merge |> 
   group_by(seqn, sex, age, education) |> 
   summarize(total_activity = sum(activity_time)) |> 
-  ggplot(aes(x = age, y = total_activity)) +
+  ggplot(aes(x = age, y = total_activity, color = sex)) +
   geom_point() +
   geom_smooth(se = FALSE)+
   facet_grid(~ education) +
@@ -200,6 +269,8 @@ nahanes_merge |>
   theme_minimal()
   
 ```
+
+according to the three-panel plot, ot show that the total activity level over the eduaction level and age. and based on the panel distriction, we observe the lines is trend to decresing in all three education level. and in the ` High school equivalent` and `More than high school`, female both have higher value than male.
 
 ##question 3 Make a three-panel plot
 
@@ -215,6 +286,8 @@ nahanes_merge |>
     title = "24-hour Activity Time Courses by Education And Sex "
   )
   
+
   
 ```
 
+The three-panel plot that shows the 24-hour activity time courses for each education level and the color is based on the sex. And the line of female and male is similar in each education level in `High school equivalent` , ` Less than high school` and  `More than high school`.
